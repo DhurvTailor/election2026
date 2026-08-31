@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -211,5 +211,1654 @@ async function runSearch(q){
 
 loadFamilies();
 </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Election 2026 - परिवार सूची</title>
+
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+      --success: #16a34a;
+      --blue: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        "Noto Sans Devanagari",
+        "Nirmala UI",
+        "Mangal",
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+
+      background: var(--primary);
+      color: #fff;
+
+      padding: 12px 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    #adminBtn {
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+
+      padding: 8px 12px;
+      border-radius: 8px;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    #adminBtn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .search-wrap {
+      position: sticky;
+      top: 52px;
+      z-index: 90;
+
+      padding: 12px;
+
+      background: var(--bg);
+    }
+
+    #searchInput {
+      width: 100%;
+
+      padding: 13px 14px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: #fff;
+
+      color: var(--text);
+      font-size: 15px;
+
+      outline: none;
+
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    #searchInput:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main {
+      padding: 0 12px 80px;
+    }
+
+    #searchResults {
+      padding: 0 12px;
+    }
+
+    /* =========================
+       FAMILY CARD
+    ========================= */
+
+    .family {
+      background: var(--card);
+
+      border-radius: 12px;
+
+      margin-bottom: 12px;
+
+      overflow: hidden;
+
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .family-head {
+      padding: 11px 14px;
+
+      background: #ecfdf5;
+
+      color: var(--primary-dark);
+
+      font-weight: 700;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .family-number {
+      font-size: 15px;
+    }
+
+    .family-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* =========================
+       MEMBER
+    ========================= */
+
+    .member {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+
+      padding: 10px 14px;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .member-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .member .name {
+      font-size: 15px;
+      font-weight: 500;
+
+      overflow-wrap: anywhere;
+    }
+
+    .member .mobile {
+      margin-top: 2px;
+
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .call-btn {
+      width: 36px;
+      height: 36px;
+
+      flex-shrink: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: #22c55e;
+      color: #fff;
+
+      text-decoration: none;
+
+      font-size: 16px;
+
+      border: none;
+    }
+
+    .call-btn:hover {
+      background: #16a34a;
+    }
+
+    .no-mobile {
+      width: 36px;
+      height: 36px;
+
+      flex-shrink: 0;
+    }
+
+    .admin-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      border: none;
+
+      border-radius: 8px;
+
+      padding: 7px 9px;
+
+      color: #fff;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .edit-btn {
+      background: var(--blue);
+    }
+
+    .edit-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .del-btn {
+      background: var(--danger);
+    }
+
+    .del-btn:hover {
+      background: #b91c1c;
+    }
+
+    /* =========================
+       ADD FORM
+    ========================= */
+
+    .add-form {
+      background: #fff;
+
+      padding: 14px;
+
+      border-radius: 12px;
+
+      margin: 0 12px 12px;
+
+      box-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.07);
+    }
+
+    .add-form h3 {
+      margin: 0 0 12px;
+
+      font-size: 16px;
+
+      color: var(--primary-dark);
+    }
+
+    .add-form input {
+      width: 100%;
+
+      padding: 11px 12px;
+
+      margin-bottom: 8px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+      outline: none;
+    }
+
+    .add-form input:focus {
+      border-color: var(--primary);
+    }
+
+    .add-form button {
+      width: 100%;
+
+      padding: 11px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background: var(--primary);
+
+      color: #fff;
+
+      font-size: 14px;
+
+      font-weight: 700;
+    }
+
+    .add-form button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+
+      z-index: 200;
+
+      background: rgba(0, 0, 0, 0.45);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 16px;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 340px;
+
+      background: #fff;
+
+      border-radius: 12px;
+
+      padding: 18px;
+
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+      margin: 0;
+
+      font-size: 16px;
+
+      font-weight: 700;
+    }
+
+    .modal input {
+      width: 100%;
+
+      padding: 11px;
+
+      margin: 12px 0;
+
+      border: 1px solid var(--border);
+
+      border-radius: 8px;
+
+      font-size: 18px;
+
+      text-align: center;
+
+      letter-spacing: 5px;
+
+      outline: none;
+    }
+
+    .modal input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+
+      padding: 10px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+    }
+
+    .cancel-btn {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .ok-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+      text-align: center;
+
+      color: var(--muted);
+
+      padding: 25px 15px;
+
+      font-size: 13px;
+    }
+
+    .error-status {
+      color: var(--danger);
+    }
+
+    .success-status {
+      color: var(--success);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 480px) {
+
+      header h1 {
+        font-size: 15px;
+      }
+
+      #adminBtn {
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+
+      .member {
+        padding: 10px 12px;
+      }
+
+      .family-head {
+        padding: 10px 12px;
+      }
+
+      .admin-actions {
+        gap: 4px;
+      }
+
+      .icon-btn {
+        padding: 7px 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <header>
+    <h1>Election 2026 – परिवार सूची</h1>
+
+    <button id="adminBtn" type="button">
+      Admin
+    </button>
+  </header>
+
+
+  <!-- =========================
+       SEARCH
+  ========================== -->
+
+  <div class="search-wrap">
+
+    <input
+      id="searchInput"
+      type="search"
+      autocomplete="off"
+      placeholder="नाम या मोबाइल नंबर खोजें..."
+      aria-label="नाम या मोबाइल नंबर खोजें"
+    >
+
+  </div>
+
+
+  <!-- =========================
+       SEARCH RESULTS
+  ========================== -->
+
+  <div id="searchResults"></div>
+
+
+  <!-- =========================
+       ADMIN ADD FORM
+  ========================== -->
+
+  <div id="addFormWrap" class="hidden"></div>
+
+
+  <!-- =========================
+       FAMILY LIST
+  ========================== -->
+
+  <main id="familyList">
+
+    <div class="status">
+      डेटा लोड हो रहा है...
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       ADMIN MODAL
+  ========================== -->
+
+  <div id="modalBg" class="modal-bg hidden">
+
+    <div class="modal">
+
+      <p class="modal-title">
+        Admin कोड डालें
+      </p>
+
+      <input
+        id="adminCodeInput"
+        type="password"
+        maxlength="4"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="••••"
+      >
+
+      <div class="modal-actions">
+
+        <button
+          class="cancel-btn"
+          type="button"
+          onclick="closeModal()"
+        >
+          रद्द करें
+        </button>
+
+        <button
+          class="ok-btn"
+          type="button"
+          onclick="checkAdminCode()"
+        >
+          ठीक है
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    // ==========================================================
+    // VERCEL CONFIGURATION
+    // ==========================================================
+    //
+    // Backend भी इसी Vercel project में रहेगा।
+    //
+    // इसलिए:
+    //
+    // Website:
+    // https://your-project.vercel.app
+    //
+    // API:
+    // https://your-project.vercel.app/api/members
+    //
+    // किसी localhost या file:/// URL की जरूरत नहीं।
+    // ==========================================================
+
+    const API_BASE = '';
+
+
+    // ==========================================================
+    // STATE
+    // ==========================================================
+
+    let isAdmin = false;
+    let adminCode = '';
+    let searchTimer = null;
+
+
+    // ==========================================================
+    // DOM ELEMENTS
+    // ==========================================================
+
+    const familyList =
+      document.getElementById('familyList');
+
+    const searchInput =
+      document.getElementById('searchInput');
+
+    const searchResults =
+      document.getElementById('searchResults');
+
+    const modalBg =
+      document.getElementById('modalBg');
+
+    const adminCodeInput =
+      document.getElementById('adminCodeInput');
+
+    const addFormWrap =
+      document.getElementById('addFormWrap');
+
+    const adminBtn =
+      document.getElementById('adminBtn');
+
+
+    // ==========================================================
+    // SAFE HTML ESCAPE
+    // ==========================================================
+
+    function escapeHtml(value) {
+
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    }
+
+
+    // ==========================================================
+    // API HELPER
+    // ==========================================================
+
+    async function apiRequest(url, options = {}) {
+
+      const response = await fetch(
+        `${API_BASE}${url}`,
+        {
+          ...options,
+
+          headers: {
+            ...(options.headers || {})
+          }
+        }
+      );
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok) {
+
+        const message =
+          data?.error ||
+          `Server error (${response.status})`;
+
+        throw new Error(message);
+      }
+
+      return data;
+    }
+
+
+    // ==========================================================
+    // ADMIN BUTTON
+    // ==========================================================
+
+    adminBtn.addEventListener('click', () => {
+
+      if (isAdmin) {
+
+        logoutAdmin();
+
+      } else {
+
+        openModal();
+
+      }
+
+    });
+
+
+    // ==========================================================
+    // OPEN ADMIN MODAL
+    // ==========================================================
+
+    function openModal() {
+
+      modalBg.classList.remove('hidden');
+
+      adminCodeInput.value = '';
+
+      setTimeout(() => {
+        adminCodeInput.focus();
+      }, 100);
+
+    }
+
+
+    // ==========================================================
+    // CLOSE ADMIN MODAL
+    // ==========================================================
+
+    function closeModal() {
+
+      modalBg.classList.add('hidden');
+
+      adminCodeInput.value = '';
+
+    }
+
+
+    // ==========================================================
+    // CHECK ADMIN CODE
+    // ==========================================================
+
+    function checkAdminCode() {
+
+      const value =
+        adminCodeInput.value.trim();
+
+      if (!value) {
+
+        alert('Admin code डालें।');
+
+        return;
+      }
+
+
+      if (value === '4141') {
+
+        isAdmin = true;
+
+        adminCode = value;
+
+        adminBtn.textContent =
+          'Admin ✓';
+
+        closeModal();
+
+        renderAddForm();
+
+        loadFamilies();
+
+      } else {
+
+        alert('गलत Admin code');
+
+        adminCodeInput.value = '';
+
+        adminCodeInput.focus();
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // ENTER KEY FOR ADMIN CODE
+    // ==========================================================
+
+    adminCodeInput.addEventListener(
+      'keydown',
+      event => {
+
+        if (event.key === 'Enter') {
+
+          checkAdminCode();
+
+        }
+
+        if (event.key === 'Escape') {
+
+          closeModal();
+
+        }
+
+      }
+    );
+
+
+    // ==========================================================
+    // LOGOUT
+    // ==========================================================
+
+    function logoutAdmin() {
+
+      isAdmin = false;
+
+      adminCode = '';
+
+      adminBtn.textContent = 'Admin';
+
+      renderAddForm();
+
+      loadFamilies();
+
+    }
+
+
+    // ==========================================================
+    // LOAD ALL FAMILIES
+    // ==========================================================
+
+    async function loadFamilies() {
+
+      familyList.innerHTML = `
+        <div class="status">
+          डेटा लोड हो रहा है...
+        </div>
+      `;
+
+      searchResults.innerHTML = '';
+
+      try {
+
+        const families =
+          await apiRequest('/api/members');
+
+        if (!Array.isArray(families)) {
+
+          throw new Error(
+            'Server ने गलत data भेजा है।'
+          );
+
+        }
+
+
+        if (families.length === 0) {
+
+          familyList.innerHTML = `
+            <div class="status">
+              अभी कोई परिवार उपलब्ध नहीं है।
+            </div>
+          `;
+
+          return;
+        }
+
+
+        familyList.innerHTML =
+          families
+            .map(renderFamily)
+            .join('');
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        familyList.innerHTML = `
+          <div class="status error-status">
+            Server से कनेक्ट नहीं हो पाया।<br>
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // RENDER FAMILY
+    // ==========================================================
+
+    function renderFamily(family) {
+
+      const members =
+        Array.isArray(family.members)
+          ? family.members
+          : [];
+
+
+      const label =
+        family.family_label
+          ? ` (${escapeHtml(family.family_label)})`
+          : '';
+
+
+      const memberHtml =
+        members.length > 0
+
+          ? members
+              .map(renderMember)
+              .join('')
+
+          : `
+            <div class="member">
+              <span class="name">
+                कोई सदस्य नहीं
+              </span>
+            </div>
+          `;
+
+
+      return `
+        <section class="family">
+
+          <div class="family-head">
+
+            <span class="family-number">
+              परिवार ${escapeHtml(family.family_number)}
+              ${label}
+            </span>
+
+            <span class="family-count">
+              ${members.length} सदस्य
+            </span>
+
+          </div>
+
+          ${memberHtml}
+
+        </section>
+      `;
+
+    }
+
+
+    // ==========================================================
+    // RENDER MEMBER
+    // ==========================================================
+
+    function renderMember(member) {
+
+      const name =
+        escapeHtml(member.name_hindi);
+
+      const mobile =
+        escapeHtml(member.mobile || '');
+
+
+      const callButton =
+        member.mobile
+
+          ? `
+            <a
+              class="call-btn"
+              href="tel:${mobile}"
+              title="Call"
+              aria-label="Call ${name}"
+            >
+              📞
+            </a>
+          `
+
+          : `
+            <span class="no-mobile"></span>
+          `;
+
+
+      let actionButtons = callButton;
+
+
+      if (isAdmin) {
+
+        const safeName =
+          escapeJsString(member.name_hindi || '');
+
+        const safeMobile =
+          escapeJsString(member.mobile || '');
+
+
+        actionButtons = `
+          <div class="admin-actions">
+
+            <button
+              class="icon-btn edit-btn"
+              type="button"
+              onclick="editMember(
+                ${Number(member.id)},
+                '${safeName}',
+                '${safeMobile}'
+              )"
+              title="Edit"
+            >
+              ✎
+            </button>
+
+
+            <button
+              class="icon-btn del-btn"
+              type="button"
+              onclick="deleteMember(${Number(member.id)})"
+              title="Delete"
+            >
+              🗑
+            </button>
+
+            ${callButton}
+
+          </div>
+        `;
+
+      }
+
+
+      return `
+        <div class="member">
+
+          <div class="member-info">
+
+            <div class="name">
+              ${name}
+            </div>
+
+            ${
+              member.mobile
+                ? `
+                  <div class="mobile">
+                    ${mobile}
+                  </div>
+                `
+                : ''
+            }
+
+          </div>
+
+          ${actionButtons}
+
+        </div>
+      `;
+
+    }
+
+
+    // ==========================================================
+    // SAFE JAVASCRIPT STRING
+    // ==========================================================
+
+    function escapeJsString(value) {
+
+      return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n');
+
+    }
+
+
+    // ==========================================================
+    // ADD MEMBER FORM
+    // ==========================================================
+
+    function renderAddForm() {
+
+      if (!isAdmin) {
+
+        addFormWrap.classList.add('hidden');
+
+        addFormWrap.innerHTML = '';
+
+        return;
+
+      }
+
+
+      addFormWrap.classList.remove('hidden');
+
+
+      addFormWrap.innerHTML = `
+
+        <div class="add-form">
+
+          <h3>
+            नया सदस्य जोड़ें
+          </h3>
+
+
+          <input
+            id="fFamilyNum"
+            type="number"
+            min="1"
+            placeholder="परिवार नंबर (जैसे 1, 2, 3...)"
+          >
+
+
+          <input
+            id="fFamilyLabel"
+            type="text"
+            maxlength="255"
+            placeholder="परिवार का लेबल (वैकल्पिक)"
+          >
+
+
+          <input
+            id="fNameHindi"
+            type="text"
+            maxlength="255"
+            placeholder="सदस्य का नाम"
+          >
+
+
+          <input
+            id="fMobile"
+            type="tel"
+            maxlength="15"
+            inputmode="numeric"
+            placeholder="मोबाइल नंबर (वैकल्पिक)"
+          >
+
+
+          <button
+            type="button"
+            onclick="addMember()"
+          >
+            सदस्य जोड़ें
+          </button>
+
+        </div>
+
+      `;
+
+    }
+
+
+    // ==========================================================
+    // ADD MEMBER
+    // ==========================================================
+
+    async function addMember() {
+
+      if (!isAdmin || !adminCode) {
+
+        alert('पहले Admin login करें।');
+
+        return;
+      }
+
+
+      const familyNumber =
+        document.getElementById('fFamilyNum')
+          ?.value.trim();
+
+
+      const familyLabel =
+        document.getElementById('fFamilyLabel')
+          ?.value.trim();
+
+
+      const nameHindi =
+        document.getElementById('fNameHindi')
+          ?.value.trim();
+
+
+      const mobile =
+        document.getElementById('fMobile')
+          ?.value.trim();
+
+
+      if (!familyNumber || !nameHindi) {
+
+        alert(
+          'परिवार नंबर और सदस्य का नाम जरूरी है।'
+        );
+
+        return;
+      }
+
+
+      try {
+
+        await apiRequest(
+          '/api/members',
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-code': adminCode
+            },
+
+            body: JSON.stringify({
+
+              familyNumber: Number(familyNumber),
+
+              familyLabel,
+
+              nameHindi,
+
+              mobile,
+
+              adminCode
+
+            })
+          }
+        );
+
+
+        alert('सदस्य सफलतापूर्वक जोड़ दिया गया।');
+
+
+        document.getElementById('fFamilyNum').value = '';
+
+        document.getElementById('fFamilyLabel').value = '';
+
+        document.getElementById('fNameHindi').value = '';
+
+        document.getElementById('fMobile').value = '';
+
+
+        await loadFamilies();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          `सदस्य जोड़ने में समस्या: ${error.message}`
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // EDIT MEMBER
+    // ==========================================================
+
+    async function editMember(
+      id,
+      currentName,
+      currentMobile
+    ) {
+
+      if (!isAdmin || !adminCode) {
+
+        alert('पहले Admin login करें।');
+
+        return;
+      }
+
+
+      const newName =
+        prompt(
+          'नया नाम:',
+          currentName
+        );
+
+
+      if (newName === null) {
+
+        return;
+      }
+
+
+      const cleanName =
+        newName.trim();
+
+
+      if (!cleanName) {
+
+        alert('नाम खाली नहीं हो सकता।');
+
+        return;
+      }
+
+
+      const newMobile =
+        prompt(
+          'नया मोबाइल नंबर:',
+          currentMobile || ''
+        );
+
+
+      if (newMobile === null) {
+
+        return;
+      }
+
+
+      try {
+
+        await apiRequest(
+          `/api/members/${Number(id)}`,
+          {
+            method: 'PUT',
+
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-code': adminCode
+            },
+
+            body: JSON.stringify({
+
+              nameHindi: cleanName,
+
+              mobile: newMobile.trim(),
+
+              adminCode
+
+            })
+          }
+        );
+
+
+        alert('Member update हो गया।');
+
+        await loadFamilies();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          `Edit में समस्या: ${error.message}`
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // DELETE MEMBER
+    // ==========================================================
+
+    async function deleteMember(id) {
+
+      if (!isAdmin || !adminCode) {
+
+        alert('पहले Admin login करें।');
+
+        return;
+      }
+
+
+      const confirmed =
+        confirm(
+          'क्या आप वाकई इस सदस्य को हटाना चाहते हैं?'
+        );
+
+
+      if (!confirmed) {
+
+        return;
+      }
+
+
+      try {
+
+        await apiRequest(
+          `/api/members/${Number(id)}`,
+          {
+            method: 'DELETE',
+
+            headers: {
+              'x-admin-code': adminCode
+            }
+          }
+        );
+
+
+        alert('Member delete हो गया।');
+
+        await loadFamilies();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          `Delete में समस्या: ${error.message}`
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // SEARCH INPUT
+    // ==========================================================
+
+    searchInput.addEventListener(
+      'input',
+      () => {
+
+        clearTimeout(searchTimer);
+
+
+        const query =
+          searchInput.value.trim();
+
+
+        if (!query) {
+
+          searchResults.innerHTML = '';
+
+          familyList.classList.remove('hidden');
+
+          return;
+        }
+
+
+        searchTimer =
+          setTimeout(
+            () => runSearch(query),
+            250
+          );
+
+      }
+    );
+
+
+    // ==========================================================
+    // SEARCH
+    // ==========================================================
+
+    async function runSearch(query) {
+
+      familyList.classList.add('hidden');
+
+
+      searchResults.innerHTML = `
+        <div class="status">
+          खोजा जा रहा है...
+        </div>
+      `;
+
+
+      try {
+
+        const rows =
+          await apiRequest(
+            `/api/search?q=${encodeURIComponent(query)}`
+          );
+
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+
+          searchResults.innerHTML = `
+            <div class="status">
+              कोई मैच नहीं मिला।
+            </div>
+          `;
+
+          return;
+        }
+
+
+        searchResults.innerHTML = `
+
+          <div class="family">
+
+            ${rows
+              .map(renderSearchResult)
+              .join('')}
+
+          </div>
+
+        `;
+
+      } catch (error) {
+
+        console.error(error);
+
+        searchResults.innerHTML = `
+          <div class="status error-status">
+            Search में समस्या हुई।<br>
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // SEARCH RESULT
+    // ==========================================================
+
+    function renderSearchResult(member) {
+
+      const name =
+        escapeHtml(member.name_hindi);
+
+
+      const mobile =
+        escapeHtml(member.mobile || '');
+
+
+      const familyNumber =
+        escapeHtml(member.family_number);
+
+
+      return `
+
+        <div class="member">
+
+          <div class="member-info">
+
+            <div class="name">
+
+              ${name}
+
+              <span
+                style="
+                  color:#9ca3af;
+                  font-size:11px;
+                  margin-left:4px;
+                "
+              >
+                (परिवार ${familyNumber})
+              </span>
+
+            </div>
+
+
+            ${
+              member.mobile
+                ? `
+                  <div class="mobile">
+                    ${mobile}
+                  </div>
+                `
+                : ''
+            }
+
+          </div>
+
+
+          ${
+            member.mobile
+
+              ? `
+                <a
+                  class="call-btn"
+                  href="tel:${mobile}"
+                  title="Call"
+                  aria-label="Call ${name}"
+                >
+                  📞
+                </a>
+              `
+
+              : `
+                <span class="no-mobile"></span>
+              `
+          }
+
+        </div>
+
+      `;
+
+    }
+
+
+    // ==========================================================
+    // ESC KEY FOR MODAL
+    // ==========================================================
+
+    modalBg.addEventListener(
+      'click',
+      event => {
+
+        if (event.target === modalBg) {
+
+          closeModal();
+
+        }
+
+      }
+    );
+
+
+    // ==========================================================
+    // INITIAL LOAD
+    // ==========================================================
+
+    loadFamilies();
+
+  </script>
+
 </body>
 </html>
