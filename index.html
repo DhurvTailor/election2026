@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Election 2026 - परिवार सूची</title>
+<style>
+  :root{
+    --primary:#0f766e; --primary-dark:#115e59; --bg:#f3f4f6; --card:#ffffff;
+    --text:#1f2937; --muted:#6b7280; --danger:#dc2626; --border:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Noto Sans Devanagari','Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
+  header{position:sticky;top:0;background:var(--primary);color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  header h1{font-size:17px;margin:0;font-weight:600;}
+  #adminBtn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;}
+  .search-wrap{padding:12px;position:sticky;top:52px;background:var(--bg);z-index:9;}
+  #searchInput{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);font-size:15px;background:#fff;}
+  #searchResults{padding:0 12px;}
+  main{padding:0 12px 80px;}
+  .family{background:var(--card);border-radius:12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;}
+  .family-head{padding:10px 14px;background:#ecfdf5;font-weight:600;color:var(--primary-dark);display:flex;justify-content:space-between;align-items:center;}
+  .member{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);}
+  .member .name{font-size:15px;}
+  .member .mobile{font-size:12px;color:var(--muted);}
+  .call-btn{background:#22c55e;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:16px;flex-shrink:0;}
+  .no-mobile{width:36px;height:36px;flex-shrink:0;}
+  .admin-actions{display:flex;gap:6px;}
+  .icon-btn{border:none;border-radius:8px;padding:6px 9px;font-size:13px;color:#fff;}
+  .edit-btn{background:#2563eb;}
+  .del-btn{background:var(--danger);}
+  .add-form{background:#fff;padding:12px;border-radius:12px;margin:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .add-form h3{margin:0 0 10px;font-size:15px;color:var(--primary-dark);}
+  .add-form input{width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid var(--border);font-size:14px;}
+  .add-form button{width:100%;padding:11px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:14px;font-weight:600;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px;}
+  .modal{background:#fff;border-radius:12px;padding:18px;width:100%;max-width:340px;}
+  .modal input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);font-size:16px;margin:10px 0;text-align:center;letter-spacing:4px;}
+  .modal-actions{display:flex;gap:8px;}
+  .modal-actions button{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;}
+  .cancel-btn{background:#e5e7eb;}
+  .ok-btn{background:var(--primary);color:#fff;}
+  .status{text-align:center;color:var(--muted);padding:20px;font-size:13px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Election 2026 – परिवार सूची</h1>
+  <button id="adminBtn">Admin</button>
+</header>
+
+<div class="search-wrap">
+  <input id="searchInput" type="text" placeholder="नाम या मोबाइल नंबर खोजें (Hindi/Hinglish दोनों चलेगा)...">
+</div>
+
+<div id="searchResults"></div>
+
+<div id="addFormWrap" class="hidden"></div>
+
+<main id="familyList">
+  <div class="status">डेटा लोड हो रहा है...</div>
+</main>
+
+<div id="modalBg" class="modal-bg hidden">
+  <div class="modal">
+    <p style="margin:0;font-weight:600;">Admin कोड डालें</p>
+    <input id="adminCodeInput" type="password" maxlength="4" inputmode="numeric" placeholder="4141">
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal()">रद्द करें</button>
+      <button class="ok-btn" onclick="checkAdminCode()">ठीक है</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⚠️ Deploy karte waqt yahan apne backend server ka URL daalein (Render/Railway pe host karke)
+const API_BASE = 'http://localhost:4000';
+
+let isAdmin = false;
+let adminCode = '';
+
+const familyList = document.getElementById('familyList');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const modalBg = document.getElementById('modalBg');
+const addFormWrap = document.getElementById('addFormWrap');
+
+document.getElementById('adminBtn').onclick = () => {
+  if (isAdmin) { isAdmin = false; adminCode=''; document.getElementById('adminBtn').textContent='Admin'; renderAddForm(); loadFamilies(); }
+  else { modalBg.classList.remove('hidden'); document.getElementById('adminCodeInput').focus(); }
+};
+function closeModal(){ modalBg.classList.add('hidden'); document.getElementById('adminCodeInput').value=''; }
+function checkAdminCode(){
+  const val = document.getElementById('adminCodeInput').value.trim();
+  if (val === '4141') {
+    isAdmin = true; adminCode = val;
+    document.getElementById('adminBtn').textContent = 'Admin ✓';
+    closeModal(); renderAddForm(); loadFamilies();
+  } else { alert('गलत कोड'); }
+}
+
+async function loadFamilies(){
+  familyList.innerHTML = '<div class="status">डेटा लोड हो रहा है...</div>';
+  try {
+    const res = await fetch(`${API_BASE}/api/members`);
+    const families = await res.json();
+    if (!families.length){ familyList.innerHTML = '<div class="status">अभी कोई डेटा नहीं है।</div>'; return; }
+    familyList.innerHTML = families.map(renderFamily).join('');
+  } catch(e){
+    familyList.innerHTML = '<div class="status">Server से कनेक्ट नहीं हो पाया। API_BASE URL जांचें।</div>';
+  }
+}
+
+function renderFamily(f){
+  const members = f.members.map(m => renderMember(m)).join('');
+  return `<div class="family">
+    <div class="family-head"><span>परिवार ${f.family_number}${f.family_label ? ' ('+f.family_label+')' : ''}</span></div>
+    ${members || '<div class="member"><span class="name">कोई सदस्य नहीं</span></div>'}
+  </div>`;
+}
+
+function renderMember(m){
+  const callBtn = m.mobile
+    ? `<a class="call-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none;" href="tel:${m.mobile}">📞</a>`
+    : `<span class="no-mobile"></span>`;
+  const adminBtns = isAdmin ? `
+    <div class="admin-actions">
+      <button class="icon-btn edit-btn" onclick="editMember(${m.id}, '${escapeAttr(m.name_hindi)}', '${m.mobile||''}')">✎</button>
+      <button class="icon-btn del-btn" onclick="deleteMember(${m.id})">🗑</button>
+      ${callBtn}
+    </div>` : callBtn;
+  return `<div class="member">
+    <div>
+      <div class="name">${m.name_hindi}</div>
+      ${m.mobile ? `<div class="mobile">${m.mobile}</div>` : ''}
+    </div>
+    ${adminBtns}
+  </div>`;
+}
+function escapeAttr(s){ return (s||'').replace(/'/g,"\\'"); }
+
+function renderAddForm(){
+  if (!isAdmin){ addFormWrap.classList.add('hidden'); addFormWrap.innerHTML=''; return; }
+  addFormWrap.classList.remove('hidden');
+  addFormWrap.innerHTML = `
+    <div class="add-form">
+      <h3>नया सदस्य जोड़ें</h3>
+      <input id="fFamilyNum" type="number" placeholder="परिवार नंबर (जैसे 1, 2, 3...)">
+      <input id="fFamilyLabel" type="text" placeholder="परिवार का लेबल (वैकल्पिक)">
+      <input id="fNameHindi" type="text" placeholder="सदस्य का नाम (हिंदी में)">
+      <input id="fMobile" type="tel" placeholder="मोबाइल नंबर (वैकल्पिक)">
+      <button onclick="addMember()">सदस्य जोड़ें</button>
+    </div>`;
+}
+
+async function addMember(){
+  const familyNumber = document.getElementById('fFamilyNum').value.trim();
+  const familyLabel = document.getElementById('fFamilyLabel').value.trim();
+  const nameHindi = document.getElementById('fNameHindi').value.trim();
+  const mobile = document.getElementById('fMobile').value.trim();
+  if (!familyNumber || !nameHindi){ alert('परिवार नंबर और नाम जरूरी है'); return; }
+  const res = await fetch(`${API_BASE}/api/members`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ familyNumber, familyLabel, nameHindi, mobile, adminCode })
+  });
+  if (res.ok){ ['fFamilyNum','fFamilyLabel','fNameHindi','fMobile'].forEach(id=>document.getElementById(id).value=''); loadFamilies(); }
+  else alert('कुछ गलत हुआ, दोबारा कोशिश करें');
+}
+
+async function editMember(id, currentName, currentMobile){
+  const newName = prompt('नया नाम (हिंदी में):', currentName);
+  if (newName === null) return;
+  const newMobile = prompt('नया मोबाइल नंबर:', currentMobile);
+  const res = await fetch(`${API_BASE}/api/members/${id}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ nameHindi: newName, mobile: newMobile, adminCode })
+  });
+  if (res.ok) loadFamilies(); else alert('Edit fail हुआ');
+}
+
+async function deleteMember(id){
+  if (!confirm('क्या आप वाकई इस सदस्य को हटाना चाहते हैं?')) return;
+  const res = await fetch(`${API_BASE}/api/members/${id}?adminCode=${adminCode}`, { method:'DELETE' });
+  if (res.ok) loadFamilies(); else alert('Delete fail हुआ');
+}
+
+let searchTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  const q = searchInput.value.trim();
+  if (!q){ searchResults.innerHTML=''; familyList.classList.remove('hidden'); return; }
+  searchTimer = setTimeout(() => runSearch(q), 250);
+});
+
+async function runSearch(q){
+  familyList.classList.add('hidden');
+  const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}`);
+  const rows = await res.json();
+  if (!rows.length){ searchResults.innerHTML = '<div class="status">कोई मैच नहीं मिला</div>'; return; }
+  searchResults.innerHTML = `<div class="family">${rows.map(m => `
+    <div class="member">
+      <div>
+        <div class="name">${m.name_hindi} <span style="color:#9ca3af;font-size:11px;">(परिवार ${m.family_number})</span></div>
+        ${m.mobile ? `<div class="mobile">${m.mobile}</div>` : ''}
+      </div>
+      ${m.mobile ? `<a class="call-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none;" href="tel:${m.mobile}">📞</a>` : ''}
+    </div>`).join('')}</div>`;
+}
+
+loadFamilies();
+</script>
+</body>
+</html>
